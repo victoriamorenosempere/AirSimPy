@@ -38,57 +38,68 @@ AirSimPy contains three models:
 
 ---
 
-## Why AirSimPy?
+## Repository Structure
 
-Flight delays cost the aviation industry billions annually. Most existing ATM simulation research focuses on airspace congestion and in-flight delays — but **ground operations, particularly taxiing, are a significant and undermodelled source of delay**.
-
-AirSimPy contributes to the field by:
-
-- Introducing the **first SimPy DES framework to model taxi times as fully integrated stochastic components**, using log-normal distributions fitted to real flight data
-- Demonstrating that for short-haul routes such as LHR–MAD, **taxi times before take-off can exceed airborne flight time** when runway availability is constrained
-- Providing a **user-friendly, interactive interface** accessible to aviation stakeholders without simulation or coding expertise
-- Offering a reproducible open-source framework on SimPy, enabling community collaboration and extension
+AirSimPy/
+├── AirSimPy_VMS.ipynb                                         # Main simulation notebook
+├── FlightData_SAMPLE_synthetic_testing_only.csv               # Fictional sample data — Mordor to Bikini Bottom
+├── LHR_MAD_FlightSchedule_SAMPLE_synthetic_testing_only.csv   # Fictional schedule — Mordor to Bikini Bottom
+├── README.md                                                  # This file
+└── LICENSE                                                    # MIT Licence
 
 ---
 
-## Quick Start with Sample Data
+## Sample Data — Mordor to Bikini Bottom 🧙‍♀️🍍
 
-This repository includes **synthetic sample data** so you can run the simulation immediately without needing a FlightRadar24 account.
+To allow anyone to run AirSimPy immediately — without needing a FlightRadar24 account — this repository includes a **fully fictional sample dataset** based on a completely invented flight route:
 
-```bash
-git clone https://github.com/victoriamorenosempere/AirSimPy.git
-cd AirSimPy
-pip install simpy pandas numpy matplotlib scipy seaborn
-jupyter notebook AirSimPy_VMS.ipynb
-```
+> **Mordor International Airport (MOR) → Bikini Bottom Airport (BIK)**
 
-The two sample files are included in the repository:
+This fictional dataset was generated programmatically from the same column structure and altitude-based logic as real flight tracking data, with all identifiers replaced:
 
-| File | Contents |
+| Real | Fictional |
 |---|---|
-| `FlightData ordered by date hour.csv` | Synthetic positional flight records with altitude, speed, and callsign |
-| `LHR MAD Flight Schedule.csv` | Synthetic scheduled departure and arrival times |
+| London Heathrow (LHR) | Mordor International (MOR) |
+| Madrid Barajas (MAD) | Bikini Bottom Airport (BIK) |
+| Real callsigns (e.g. BAW462V) | Fictional callsigns (e.g. BIK462V, MOR31XX) |
+| Real flight numbers (e.g. BA462) | Fictional flight numbers (e.g. BK0462, MR3181) |
+| Real coordinates | Fictional coordinates in the mid-Pacific |
+| Original times | All times shifted by +1 hour |
 
-> ⚠️ **The sample data is synthetic and for demonstration purposes only.** It will show you that the code runs and produces all outputs correctly, but the results will not reflect real-world flight performance. To reproduce the original research findings, collect real data using your own FlightRadar24 subscription (see Using Your Own Data below).
+> ⚠️ **The sample data is entirely fictional and for demonstration purposes only.** It will show you that the code runs and produces outputs correctly, but the results do not reflect any real-world flight performance. To reproduce the original research findings, collect real data using your own FlightRadar24 subscription — see [Using Your Own Data](#using-your-own-data) below.
 
 **Try the Operational Comparison Model with the sample data:**
 
-Enter the flight callsign or flight number: BAW462V
+Enter the flight callsign or flight number: MOR31XX
 Enter the flight date (YYYY-MM-DD): 2024-06-12
-Enter the origin airport code (e.g., LHR): LHR
-Enter the destination airport code (e.g., MAD): MAD
+Enter the origin airport code: MOR
+Enter the destination airport code: BIK
+
+**Try Models 1 & 2 with the sample data — use any of these callsigns:**
+
+| Callsign | Flight Number |
+|---|---|
+| MOR31XX | MR3181 |
+| BIK462V | BK0462 |
+| MOR31MA | MR3163 |
+| BIK04MJ | BK0458 |
+| MOR31PP | MR3175 |
+| MOR3177 | MR3177 |
 
 ---
 
 ## Using Your Own Data
 
-To run AirSimPy on a real flight route, you need two CSV files in the formats described below.
+To run AirSimPy on a real flight route, collect two CSV files and place them in the same directory as the notebook, using these exact filenames:
+
+- `FlightData ordered by date hour.csv`
+- `LHR MAD Flight Schedule.csv`
 
 ### File 1 — Flight Tracking Data
 
 **Filename:** `FlightData ordered by date hour.csv`
 
-Collect this from [FlightRadar24](https://www.flightradar24.com/) by downloading the positional history for each flight on your chosen route.
+Collect from [FlightRadar24](https://www.flightradar24.com/) by downloading the positional history for each flight on your chosen route.
 
 | Column | Type | Description | Example |
 |---|---|---|---|
@@ -101,12 +112,12 @@ Collect this from [FlightRadar24](https://www.flightradar24.com/) by downloading
 | `Direction` | float | Heading in degrees | `135.0` |
 
 **Important notes on the Position column:**
-- For normal flight records this contains coordinates, e.g. `51.470000,-0.460000`
-- For cancelled flights, enter `CANCELED` manually
-- For days with no scheduled flight, enter `NOFLIGHTSCHEDULED` manually
+- Normal flight records contain coordinates e.g. `51.470000,-0.460000`
+- For cancelled flights enter `CANCELED` manually
+- For days with no scheduled flight enter `NOFLIGHTSCHEDULED` manually
 - These must be added by hand as FlightRadar24 does not export this automatically
 
-**How the simulation uses altitude to calculate taxi times:**
+**How the simulation derives taxi times from altitude:**
 
 Aircraft starts moving at Altitude = 0  →  taxi_start_before_takeoff
 Altitude rises above 0                  →  taxi_end_before_takeoff / takeoff
@@ -117,12 +128,12 @@ Aircraft stops (no more timestamps)     →  taxi_end_after_landing
 
 **Filename:** `LHR MAD Flight Schedule.csv`
 
-Create this manually from the airline's published timetable for your route and study period.
+Create manually from the airline's published timetable for your route and study period.
 
 | Column | Type | Description | Example |
 |---|---|---|---|
-| `Flight` | string | Flight number (as shown on ticket/board) | `BA462` |
-| `Callsign` | string | Aircraft callsign — must match File 1 | `BAW462V` |
+| `Flight` | string | Flight number as shown on ticket/board | `BA462` |
+| `Callsign` | string | Aircraft callsign — must match File 1 exactly | `BAW462V` |
 | `Estimated Departure` | time string HH:MM:SS | Scheduled departure time | `06:15:00` |
 | `Estimated Arrival` | time string HH:MM:SS | Scheduled arrival time | `08:40:00` |
 
@@ -135,6 +146,22 @@ Create this manually from the airline's published timetable for your route and s
 5. Manually add `CANCELED` or `NOFLIGHTSCHEDULED` to the Position column where relevant
 6. Create the schedule file from the airline's published timetable
 7. Place both files in the same directory as the notebook
+
+---
+
+## Installation
+
+```bash
+pip install simpy pandas numpy matplotlib scipy seaborn scikit-learn pytz
+```
+
+```bash
+git clone https://github.com/victoriamorenosempere/AirSimPy.git
+cd AirSimPy
+jupyter notebook AirSimPy_VMS.ipynb
+```
+
+Or open directly in [Google Colab](https://colab.research.google.com/).
 
 ---
 
@@ -174,22 +201,22 @@ AirSimPy
 | Variable | Distribution | Basis |
 |---|---|---|
 | Taxi before take-off | Log-normal | Right-skewed; capped at 95th percentile |
-| Taxi after landing | Log-normal | More stable; dedicated gate allocation at MAD T4 Satellite |
-| Flight duration | Normal | Mean ≈ 111.09 min, SD ≈ 6.22 min (cleaned LHR–MAD data) |
+| Taxi after landing | Log-normal | More stable; dedicated gate allocation observed in real data |
+| Flight duration | Normal | Mean ≈ 111.09 min, SD ≈ 6.22 min (original research data) |
 
 ---
 
 ## Key Findings
 
-1. **Taxi times before take-off are the dominant ground delay source.** At congested airports (LHR), they can exceed airborne flight duration entirely.
-2. **Post-landing taxi times are significantly more stable** — consistent with dedicated gate allocation at Madrid Barajas Terminal 4 Satellite.
-3. **Log-normal distributions** are required for taxi times; normal distributions underfit the right skew. Sigma values must be 95th-percentile capped to prevent unrealistic outliers.
+1. **Taxi times before take-off are the dominant ground delay source.** At congested airports they can exceed airborne flight duration entirely.
+2. **Post-landing taxi times are significantly more stable** — consistent with dedicated gate allocation at the arrival airport.
+3. **Log-normal distributions** are required for taxi times; sigma values must be 95th-percentile capped to prevent unrealistic outliers.
 4. **Resource contention compounds delays** (Model 2): a 15-minute runway delay for one flight propagates across all subsequent flights sharing the same resource.
 5. **Weather primarily affects flight duration**, while runway availability and high-season congestion dominate ground delay profiles.
 
 ---
 
-## Example Results (Model 1 — Independent, real LHR–MAD data)
+## Example Results (original research data)
 
 | Flight | Taxi Before Take-off | Flight Duration | Taxi After Landing | Total |
 |---|---|---|---|---|
