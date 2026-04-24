@@ -41,7 +41,7 @@ AirSimPy contains three models:
 ## Repository Structure
 
 AirSimPy/
-├── AirSimPy_VMS_GitHUB.ipynb.ipynb                                       # Main simulation notebook
+├── AirSimPy_VMS_GitHUB.ipynb.                                            # Main simulation notebook
 ├── FlightData_SAMPLE_synthetic_testing_only.csv                          # Fictional sample data — Mordor to Bikini Bottom
 ├── MORDOR_BIKINIBOTTOM_FlightSchedule_SAMPLE_synthetic_testing_only.csv   # Fictional schedule — Mordor to Bikini Bottom
 ├── README.md                                                              # This file
